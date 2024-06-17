@@ -1,0 +1,11 @@
+{
+  "name": "redirect-importer",
+  "version": "1.0.0",
+  "description": "Helper function to import Redirect rules into KV store",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jaiganesh Girinathan",
+  "license": "MIT-0"
+}

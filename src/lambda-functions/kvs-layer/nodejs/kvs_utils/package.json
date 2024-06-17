@@ -1,0 +1,16 @@
+{
+  "name": "kvs-layer",
+  "version": "1.0.0",
+  "description": "Lambda Layer interfacing with CloudFront Key Value store",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jaiganesh Girinathan",
+  "license": "MIT-0",
+  "dependencies": {
+    "@aws-sdk/client-cloudfront-keyvaluestore": "^3.523.0",
+    "@aws-sdk/signature-v4-crt": "^3.523.0",
+    "@aws-sdk/signature-v4-multi-region": "^3.523.0"
+  }
+}
