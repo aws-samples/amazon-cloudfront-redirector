@@ -1,4 +1,4 @@
-## My Project
+## Amazon CloudFront Redirector
 
 TODO: Fill this README out!
 
