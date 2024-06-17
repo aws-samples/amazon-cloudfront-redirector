@@ -1,14 +1,6 @@
 import { S3Layer } from '/opt/nodejs/s3_utils/index.mjs';
 import { KVSLayer } from '/opt/nodejs/kvs_utils/index.mjs';
-// import { SignatureV4MultiRegion } from "@aws-sdk/signature-v4-multi-region";
-// import "@aws-sdk/signature-v4-crt";
 import * as crypto from "crypto";
-import * as util from "util";
-
-// const client = new CloudFrontKeyValueStoreClient({
-//     signerConstructor: SignatureV4MultiRegion, // *** add this parameter. ***
-//     retryMode: "adaptive"
-// });
 
 // prefixes on different keys for easy searching on console.
 const DOMAIN_RULE_PREFIX = 'd:';
@@ -30,8 +22,7 @@ export const handler = async (event) => {
     let config = await kvsLayer.getKey("config") || '{}';
     config = JSON.parse(config);
 
-    // let domainRules = [];
-    //switch to indicate whether regex and domain based rules exists and needs to be evaluated
+    // switch to indicate whether regex and domain based rules exists and needs to be evaluated
     // from the CFF Function
     let should_run_regex = false;
     let should_run_domain = false;
@@ -51,7 +42,7 @@ export const handler = async (event) => {
         if (ruleDefn['type'] === "domain") {
 
             let domainRule = await addIfExists({}, ruleDefn, ['host', 'active', 'start', 'end']);
-            let keyName = `{DOMAIN_RULE_PREFIX}{ruleDefn['host']}`;
+            let keyName = `${DOMAIN_RULE_PREFIX}${ruleDefn['host']}`;
             if (isDelete(ruleDefn)) {
                 // delete domainRules[ruleDefn['host']];
                 // deleteItem(domainRules, ruleDefn['host']);
@@ -69,7 +60,7 @@ export const handler = async (event) => {
             if (ruleDefn['to'])
                 ruleDefn['to'] = ruleDefn['to'].replaceAll("\\", "$");
             let regexRule = await addIfExists({}, ruleDefn, ['regex', 'active', 'start', 'end']);
-            let keyName = `{REGEX_RULE_PREFIX}{ruleDefn['regex']}`;
+            let keyName = `${REGEX_RULE_PREFIX}${ruleDefn['regex']}`;
 
             if (isDelete(ruleDefn)) {
                 deleteRules.set(keyName, ruleDefn);
@@ -87,7 +78,7 @@ export const handler = async (event) => {
             let key = prepareKey(ruleDefn);
             // console.log(key);
             let keyName = await generateHashForKey(key);
-            keyName = `{STANDARD_RULE_PREFIX}{keyName}`;
+            keyName = `${STANDARD_RULE_PREFIX}${keyName}`;
             if (isDelete(ruleDefn)) {
                 deleteRules.set(keyName, ruleDefn);
             }

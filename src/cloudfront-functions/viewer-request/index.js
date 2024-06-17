@@ -42,83 +42,82 @@ async function handler(event) {
 
     // check for domain match
     if (config['should_run_domain']) {
-        matchedKey = `{DOMAIN_RULE_PREFIX}{domain}`;
+        matchedKey = `${DOMAIN_RULE_PREFIX}${domain}`;
         matchedRule = await processkv(matchedKey, my_kvs, "json");
 
         if (!isActive(matchedRule)) {
             matchedKey = null, matchedRule = null;
         }
     }
-}
 
-// if no matching rule found till now check for simple redirect rule
-if (!matchedRule) {
-    matchedKey = generateHashForKey(sourceUrl);
-    debug_log("Key hash" + matchedKey);
-    matchedRule = await processkv(matchedKey, my_kvs, "json");
+    // if no matching rule found till now check for simple redirect rule
+    if (!matchedRule) {
+        matchedKey = `${STANDARD_RULE_PREFIX}${generateHashForKey(sourceUrl)}`;
+        debug_log("Key hash" + matchedKey);
+        matchedRule = await processkv(matchedKey, my_kvs, "json");
 
-    if (!isActive(matchedRule)) {
-        debug_log("matched rule not present or is inactive" + JSON.stringify(matchedRule));
-        matchedRule = null, matchedKey = null;
+        if (!isActive(matchedRule)) {
+            debug_log("matched rule not present or is inactive" + JSON.stringify(matchedRule));
+            matchedRule = null, matchedKey = null;
+        }
     }
-}
 
-if (matchedRule && isPassthrough(matchedRule)) {
-    if (debugRequest) {
-        setDebugInfo(request, matchedKey, 'passthrough');
+    if (matchedRule && isPassthrough(matchedRule)) {
+        if (debugRequest) {
+            setDebugInfo(request, matchedKey, 'passthrough');
+        }
+        return request;
     }
-    return request;
-}
 
-// if no matching rule found till now check for regex rules
-if (!matchedRule && config['should_run_regex']) {
-    debug_log("checking for regex");
-    let regexDefns = await processkv("regex_1", my_kvs, "json");
-    if (regexDefns) {
-        for (let index in regexDefns) {
-            let regexPattern = regexDefns[index];
-            if (isActive(regexPattern)) {
-                let from = regexPattern['regex'];
-                let rgx = new RegExp(from);
-                if (rgx.test(sourceUrl)) {
-                    debug_log("Pattern matched " + from);
-                    let defns = await processkv(from, my_kvs, "json");
-                    if (defns && isPassthrough(defns)) {
-                        if (debugRequest && from != '') {
-                            setDebugInfo(request, from, 'passthrough');
+    // if no matching rule found till now check for regex rules
+    if (!matchedRule && config['should_run_regex']) {
+        debug_log("checking for regex");
+        let regexDefns = await processkv("regex_1", my_kvs, "json");
+        if (regexDefns) {
+            for (let index in regexDefns) {
+                let regexPattern = regexDefns[index];
+                if (isActive(regexPattern)) {
+                    let from = regexPattern['regex'];
+                    let rgx = new RegExp(from);
+                    if (rgx.test(sourceUrl)) {
+                        debug_log("Pattern matched " + from);
+                        let defns = await processkv(`${REGEX_RULE_PREFIX}${from}`, my_kvs, "json");
+                        if (defns && isPassthrough(defns)) {
+                            if (debugRequest && from != '') {
+                                setDebugInfo(request, from, 'passthrough');
+                            }
+                            return request;
                         }
-                        return request;
-                    }
 
-                    let to = defns['to'];
-                    defns['to'] = sourceUrl.replace(rgx, to);
-                    matchedKey = from;
-                    matchedRule = defns;
-                    break;
+                        let to = defns['to'];
+                        defns['to'] = sourceUrl.replace(rgx, to);
+                        matchedKey = from;
+                        matchedRule = defns;
+                        break;
+                    }
                 }
             }
         }
     }
-}
 
-debug_log("Matched rule:" + JSON.stringify(matchedRule));
-debug_log("Matched key:" + matchedKey);
+    debug_log("Matched rule:" + JSON.stringify(matchedRule));
+    debug_log("Matched key:" + matchedKey);
 
-if (matchedRule) {
-    switch (matchedRule['type']) {
-        case 'rewrite':
-            decorateForRewrite(request, matchedRule);
-            if (debugRequest && matchedKey != '') {
-                setDebugInfo(request, matchedKey, 'rewrite');
-            }
-            break;
-        case 'domain':
-        default:
-            return generateResponse(request, matchedRule, debugRequest ? matchedKey : '');
+    if (matchedRule) {
+        switch (matchedRule['type']) {
+            case 'rewrite':
+                decorateForRewrite(request, matchedRule);
+                if (debugRequest && matchedKey != '') {
+                    setDebugInfo(request, matchedKey, 'rewrite');
+                }
+                break;
+            case 'domain':
+            default:
+                return generateResponse(request, matchedRule, debugRequest ? matchedKey : '');
+        }
     }
-}
 
-return request;
+    return request;
 }
 
 // Doesnt need to be async

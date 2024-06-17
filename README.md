@@ -39,8 +39,14 @@ This solution leverages AWS CDK meaning that [NPM, NodeJS](https://docs.npmjs.co
 ```
 # Required: set the AWS CLI profile name
 AWS_PROFILE="default"
-# Optional: set whether you want debug headers to be set by the CloudFront Function.Possible boolean values true and false.
-export ALLOW_DEBUG=false
+# Optional: set whether you want to debug the request.
+# DEBUG_MODE possible values 0,1,2. 
+# 2 -> print all log lines in CloudWatch and also send debug response headers
+# 1 -> sent only debug response headers
+# 0 -> turn off debug mode (default, recommended for production)
+
+Possible boolean values true and false.
+export DEBUG_MODE=0
 ```
 3. Run `./deploy.sh` triggering the deployment of all components in `us-east-1` AWS Region as required by CloudFront Functions and CloudFront KeyValueStore. 
 
@@ -100,15 +106,11 @@ After ingestion of these custom CSV file to S3 bucket `import` prefix, one can i
 ```
 $ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::876106257172:key-value-store/fd636e44-350e-4f33-b82d-cfaf8849b86c --output json | jq '.Items[]'
 {
-  "Key": "re:4hzDa/DWUBTHF6SBo/ikaA==",
-  "Value": "{}"
-}
-{
   "Key": "re:config",
   "Value": "{\"regex\":\"1\",\"regex_count\":\"1\",\"host\":{\"www.mydomain.com\":{\"to\":\"https://www.example.com\",\"sc\":301,\"includepath\":\"1\",\"type\":\"domain\"}}}"
 }
 {
-  "Key": "re:qETpF6YrFqXjAO5wiagyPA==",
+  "Key": "re:st:qETpF6YrFqXjAO5wiagyPA==",
   "Value": "{\"path\":\"/digital-stay/zel-mallorca/ipad-front-desk\",\"host\":\"www.example.com\",\"to\":\"https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=0707&idLang=en&origin=HOTEL\",\"sc\":301}"
 }
 {
@@ -116,8 +118,8 @@ $ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::876106257
   "Value": "[{\"regex\":\"www.example.com/(.*?[A-Z]+.*)\"}]"
 }
 {
-  "Key": "re:www.example.com/(.*?[A-Z]+.*)",
-  "Value": "{\"to\":\"$L$1\",\"sc\":301,\"regex\":\"www.example.com/(.*?[A-Z]+.*)\"}"
+  "Key": "re:rx:www.example.com/(.*?[A-Z]+.*)",
+  "Value": "{\"to\":\"$1\",\"sc\":301,\"regex\":\"www.example.com/(.*?[A-Z]+.*)\"}"
 }
 ```
 
@@ -132,4 +134,3 @@ See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more inform
 ## License
 
 This library is licensed under the MIT-0 License. See the LICENSE file.
-
