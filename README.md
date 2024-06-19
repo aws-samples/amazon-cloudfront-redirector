@@ -100,7 +100,7 @@ https,www.example.com,/digital-stay/zel-mallorca/ipad-front-desk,,,,https://www.
 After ingestion of these custom CSV file to S3 bucket `import` prefix, one can inspect how the rules are translated into CloudFront KeyValueStore using AWS CLI or inspecting the CloudFront KVS values via console:
 
 ```
-$ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::876106257172:key-value-store/fd636e44-350e-4f33-b82d-cfaf8849b86c --output json | jq '.Items[]'
+$ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::XXXXXXXXXXXX:key-value-store/fd636e44-350e-4f33-b82d-cfaf8849b86c --output json | jq '.Items[]'
 {
   "Key": "re:config",
   "Value": "{\"regex\":\"1\",\"regex_count\":\"1\",\"host\":{\"www.mydomain.com\":{\"to\":\"https://www.example.com\",\"sc\":301,\"includepath\":\"1\",\"type\":\"domain\"}}}"
