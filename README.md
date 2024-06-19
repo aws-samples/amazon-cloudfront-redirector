@@ -28,7 +28,7 @@ The CloudFront Function must be associated with a behavior of an existing CloudF
 1. On the first match, inspects the dictionary defined as value, and responds back to the viewer with a new location, status code and message as per the dictionary fields.
 1. If not match is found, no action is performed, and the request proceed to next layer.
 
-![Tag Ingest Workflow](/images/CliudFrontRedirectorModule-Request-Response.drawio.png)
+![Redirector Workflow](/images/CliudFrontRedirectorModule-Request-Response.drawio.png)
 
 ## Deployment
 
@@ -55,15 +55,11 @@ export DEBUG_MODE=0
 
 Search for the most recently deployed CloudFront Function under your account named similarly to `us-east-1AmazonCloudfrontRedirectStackRedirectorFunction...`.  Looking up its details, confirm that it has a CloudFront KeyValueStore associated.
 
-<div align="center">
-<center>![KVSRedirector CloudFront Function](/images/KVSRedirector1.png){width=75%}</center>
-</div>
+![KVSRedirector CloudFront Function](/images/KVSRedirector1.png)
 
 Continue by associating the above CloudFront Function to the behaviour of an existing CloudFront Distribution, and complete the setup by publishing the CloudFront Function.
 
-<div align="center">
-<center>![KVSRedirector CloudFront Function Association](/images/KVSRedirector3.png){width=75%}</center>
-</div>
+![KVSRedirector CloudFront Function Association](/images/KVSRedirector3.png)
 
 ## Populating redirection rules for the first time
 
