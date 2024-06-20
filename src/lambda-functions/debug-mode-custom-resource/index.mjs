@@ -21,7 +21,7 @@ export const handler = async (event) => {
         const {
             RequestType, PhysicalResourceId, ResourceProperties, RequestId,
         } = event;
-        const { debugMode = false } = ResourceProperties;
+        const { debugMode = 0 } = ResourceProperties;
         const validTypes = ['Create', 'Update', 'Delete'];
         if (!validTypes.includes(RequestType)) { throw new Error('Invalid RequestType'); }
 

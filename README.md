@@ -87,8 +87,8 @@ Consider the following custom CSV file example with the following three differen
 ```
 scheme,host,path,qs,regex,includeqs,to,sc,active,start,end,type,pt,includepath,message
 https,www.mydomain.com,,,,,https://www.example.com,301,,,,domain,,1,
-,,,,https://www.example.com/(.*?[A-Z]+.*),,\L$1,301,,,,,,,
-https,www.example.com,/digital-stay/zel-mallorca/ipad-front-desk,,,,https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=0707&idLang=en&origin=HOTEL,301,,,
+,,,,https://www.example.com/(.*?[A-Z]+.*),,/newpath/$1,301,,,,,,,
+https,www.example.com,/stays/hotel-name/ipad-front-desk,,,,https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=1234&idLang=en&origin=HOTEL,301,,,
 ```
 
 1. The first rule is a domain type redirect (e.g. the type field has the value of "domain"). Domain rules have precedence over any other type of rules and are inspected first. In this example, all requested URLs with the domain `www.mydomain.com` are redirected to `https://www.example.com` with a 301 (Moved Permanently) status code.
@@ -107,7 +107,7 @@ $ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::XXXXXXXXX
 }
 {
   "Key": "re:st:qETpF6YrFqXjAO5wiagyPA==",
-  "Value": "{\"path\":\"/digital-stay/zel-mallorca/ipad-front-desk\",\"host\":\"www.example.com\",\"to\":\"https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=0707&idLang=en&origin=HOTEL\",\"sc\":301}"
+  "Value": "{\"path\":\"/stay/hotel-name/ipad-front-desk\",\"host\":\"www.example.com\",\"to\":\"https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=1234&idLang=en&origin=HOTEL\",\"sc\":301}"
 }
 {
   "Key": "re:regex_1",

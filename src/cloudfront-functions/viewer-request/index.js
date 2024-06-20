@@ -179,7 +179,7 @@ function generateResponse(request, defns, matchKey) {
             qsArray[key] = reqQs[key].value;
         }
     }
-    if (!Object.keys(qsArray).length)
+    if (Object.keys(qsArray).length > 0)
         defns['to'] = `${defns['to']}?${querystring.stringify(qsArray)}`;
 
     const response = {
