@@ -6,7 +6,7 @@ ROOT=$PWD
 # 2 -> print all log lines in CloudWatch and also send debug response headers
 # 1 -> sent only debug response headers
 # 0 -> turn off debug mode (default, recommended for production)
-export DEBUG_MODE=2
+export DEBUG_MODE=0
 # npx cdk bootstrap --profile $AWS_PROFILE
 npm install
 cd ./src/lambda-functions/s3-layer/nodejs/s3_utils/ && npm install
