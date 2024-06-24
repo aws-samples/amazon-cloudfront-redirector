@@ -72,15 +72,15 @@ Two different types of input files for configuring URL redirections are supporte
 - A custom CSV file containing URL redirection rules with the format depicted bellow. This input file must be imported to the S3 bucket `import` prefix.
   1. `scheme`, `host`, `path`, `qs`: Standard source URL components.  
   1. `regex`: If the rule leverages regex expressions, the pattern to match on path is defined here.
-  1. `includeqs`: 1 or 0 to include/not include query string when redirecting. Default is 1 if undefined.
+  1. `includeqs`: 1 or 0 to include/not include query string when redirecting. Default is 0 if undefined.
   1. `to`: New URL location where to redirect the matched incoming request
   1. `sc`: Status code to return like 301 or 302
-  1. `active`: 1 or 0 to enable/disable the rule. Default is 1 if undefined.
-  1. `start`, `end`: Date range for when to apply the redirection rule. If undefined, the rule takes effect immediately and has no expiry date. 
-  1. `type`: `domain` (?)
-  1. `pt`: 1 or 0 to passthrough (usefull to handle exceptions/false positives)
-  1. `includepath`: (?)
-  1. `message`: Message to return with status code
+  1. `active`: 1 or 0 to enable/disable the rule. Default(or if undefined) is 1.
+  1. `start`, `end`: Date range for when to apply the redirection rule. If undefined, the rule takes effect immediately and has no expiry date. Time specified in UTC, Example format: 2024-06-10T21:15:00
+  1. `type`: `domain`| `rewrite`
+  1. `pt`: 1 or 0 to passthrough. useful to handle exceptions/false positives where you want to explicitly allow certain URLs as-is.
+  1. `includepath`: whether to include the request path as-is in the redirected URL. Used in domain based redirects.
+  1. `message`: Message to return with status code. Used in handling 4xx errors where we can have a response body.
 
 Consider the following custom CSV file example with the following three different redirection rules are set (domain, regex and standard)
 
