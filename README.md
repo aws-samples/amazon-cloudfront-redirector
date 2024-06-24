@@ -64,8 +64,10 @@ Continue by associating the above CloudFront Function to the behaviour of an exi
 ## Populating redirection rules for the first time
 
 Two different types of input files for configuring URL redirections are supported:
+- Custom CSV
+- Apache Redirect Rules file (coming soon)
 
-- Apache mod_rewrite like format files with `RedirectMatch` only directives (e.g. `RedirectMatch "^/docs/(.*)" "http://new.example.com/docs/$1"`). For specific information on the `RedirectMatch` syntax, see [Apache mod_rewrite documentation](https://httpd.apache.org/docs/2.4/rewrite/remapping.html). This input file must be imported to S3 bucket `apache_import` prefix.
+### Importing a custom csv input file
 
 - A custom CSV file containing URL redirection rules with the format depicted bellow. This input file must be imported to the S3 bucket `import` prefix.
   1. `scheme`, `host`, `path`, `qs`: Standard source URL components.  
@@ -80,8 +82,6 @@ Two different types of input files for configuring URL redirections are supporte
   1. `includepath`: (?)
   1. `message`: Message to return with status code
 
-### Importing a custom csv input file
-
 Consider the following custom CSV file example with the following three different redirection rules are set (domain, regex and standard)
 
 ```
@@ -95,7 +95,7 @@ https,www.example.com,/stays/hotel-name/ipad-front-desk,,,,https://www.example.c
 
 1. The second rule is a regex type redirect. This is determined by leaving the scheme, host, path, and qs fields empty and by defining the regular expression to match under the regex field. All regex type redirect rules are inspected after the domain redirect rules. In this example, the pattern expression `(.*?[A-Z]+.*)` is used to match a URL path containing one or more uppercase letters followed by a period. The matched path portion is captured with \L$1 in the target URL to convert it to lowercase. 
 
-1. The third rule is a standard redirection rule, the last type to be inspected. In this example, `https://www.example.com/digital-stay/zel-mallorca/ipad-front-desk` is redirected to `https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=0707&idLang=en&origin=HOTEL` using a 301 status code.
+1. The third rule is a standard redirection rule, the last type to be inspected. In this example, `https://www.example.com/stay/hotel-name/ipad-front-desk` is redirected to `https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=1234&idLang=en&origin=HOTEL` using a 301 status code.
 
 After ingestion of these custom CSV file to S3 bucket `import` prefix, one can inspect how the rules are translated into CloudFront KeyValueStore using AWS CLI or inspecting the CloudFront KVS values via console:
 
@@ -115,7 +115,7 @@ $ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::XXXXXXXXX
 }
 {
   "Key": "re:rx:www.example.com/(.*?[A-Z]+.*)",
-  "Value": "{\"to\":\"$1\",\"sc\":301,\"regex\":\"www.example.com/(.*?[A-Z]+.*)\"}"
+  "Value": "{\"to\":\"/newpath/$1\",\"sc\":301,\"regex\":\"www.example.com/(.*?[A-Z]+.*)\"}"
 }
 ```
 
