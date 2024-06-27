@@ -171,7 +171,9 @@ x-amz-cf-id: DIsyAH7kx8fd9nnoPULEssHR9EjqcJ7K6AFxiUQJB91jG1F0qDtfWA==
 
 ## Troubleshooting
 
-To troubleshoot a specific redirect response, increase the default debug level from `0` to `1`. This is done by re-running `./deploy.sh` with `DEBUG_MODE=1` or explicitly adding `\"allow_debug\":\"1\"` to the value associated with `"re:config"` key in your KV store.
+*Disclaimer: Increasing the debug level will drive the CloudFront Function compute execution time up, and lead to throttle. We suggest to enable logging in a as needed basis.* 
+
+Increase the default debug level from 0 to either 1 or 2 by re-running `./deploy.sh` with `DEBUG_MODE=1` (`DEBUG_MODE=2`) or explicitly adding `\"allow_debug\":\"1\"` (`\"allow_debug\":\"2\"`) to the value associated with `"re:config"` key in your KV store.
 
 ```
 $ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::XXXXXXXXXXXX:key-value-store/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --output json | jq '.Items[]'
@@ -182,7 +184,7 @@ $ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::XXXXXXXXX
 (...)
 ```
 
-Afterwards, attach `debug=true` query parameter or set it as a request header to see additional an troubleshooting header ''x-match'. This header shows the exact rule that matched the request and you can use it to look up the KV store on what action was performanced.
+With debug level `1`, attach `debug=true` query parameter or set it as a request header. An additional troubleshooting header 'x-match' is made availabke in the response showing the exact rule that matched the request. You can use it to look up the KV store on what action was performanced.
 
 ```
 $ curl -I  https://www.example.com/stays/hotel-name/ipad-front-desk?debug=true 
@@ -191,13 +193,14 @@ server: CloudFront
 date: Thu, 27 Jun 2024 03:12:11 GMT
 content-length: 0
 location: https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=1234&idLang=en&origin=HOTEL
-x-debug: match-key:st:PYff/T38LiZrBklxH2yPrw==:action:redirect
+x-debug: match-key:st:PYff/T38LiZrBklxH2yPrw==:action:redirect 
 x-cache: FunctionGeneratedResponse from cloudfront
 via: 1.1 4bfeb1eae9544366893e37b97eee8e6e.cloudfront.net (CloudFront)
 x-amz-cf-pop: SYD62-P1
 x-amz-cf-id: 8yLeoKkjrWPtBHMdfAunap0y8trG0SNJF-Odtx_x2CLXH8dh_Bd3Eg==
 ```
 
+With debug level `2`, CloudWatch logs for the execution of the CloudFront Function are generated in `us-east-1` region under `/aws/cloudfront/function/<FunctionName>`. This are usefull in situations where the function generates an expected error or response.
 
 ## Security
 
