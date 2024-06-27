@@ -100,14 +100,14 @@ https,www.example.com,/stays/hotel-name/ipad-front-desk,,,,https://www.example.c
 After ingestion of these custom CSV file to S3 bucket `import` prefix, one can inspect how the rules are translated into CloudFront KeyValueStore using AWS CLI or inspecting the CloudFront KVS values via console:
 
 ```
-$ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::XXXXXXXXXXXX:key-value-store/fd636e44-350e-4f33-b82d-cfaf8849b86c --output json | jq '.Items[]'
+$ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::XXXXXXXXXXXX:key-value-store/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --output json | jq '.Items[]'
 {
   "Key": "re:config",
-  "Value": "{\"regex\":\"1\",\"regex_count\":\"1\",\"host\":{\"www.mydomain.com\":{\"to\":\"https://www.example.com\",\"sc\":301,\"includepath\":\"1\",\"type\":\"domain\"}}}"
+  "Value": "{\"should_run_regex\":true,\"should_run_domain\":true}"
 }
 {
-  "Key": "re:st:qETpF6YrFqXjAO5wiagyPA==",
-  "Value": "{\"path\":\"/stay/hotel-name/ipad-front-desk\",\"host\":\"www.example.com\",\"to\":\"https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=1234&idLang=en&origin=HOTEL\",\"sc\":301}"
+  "Key": "re:d:waf2.gbborge.people.aws.dev",
+  "Value": "{\"host\":\"www.mydomain.com\",\"to\":\"https://www.example.com\",\"sc\":301,\"type\":\"domain\",\"includepath\":\"1\"}"
 }
 {
   "Key": "re:regex_1",
@@ -117,11 +117,62 @@ $ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::XXXXXXXXX
   "Key": "re:rx:www.example.com/(.*?[A-Z]+.*)",
   "Value": "{\"to\":\"/newpath/$1\",\"sc\":301,\"regex\":\"www.example.com/(.*?[A-Z]+.*)\"}"
 }
+{
+  "Key": "re:st:PYff/T38LiZrBklxH2yPrw==",
+  "Value": "{\"path\":\"/stays/hotel-name/ipad-front-desk\",\"host\":\"www.example.com\",\"to\":\"https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=1234&idLang=en&origin=HOTEL\",\"sc\":301}"
+}
+
 ```
 
 ## Testing
-Make some curl or browser based requests and test if the redirects are working as intented. 
+
+Make some curl or browser based requests and test if the redirects are working as intented. Bellow are the responses returned by CloudFront Functions as per the example configurations previously provided.
+
+- Domain type redirect
+```
+$ curl -I https://www.mydomain.com/some/test.html 
+HTTP/2 301 
+server: CloudFront
+date: Thu, 27 Jun 2024 02:40:14 GMT
+content-length: 0
+location: https://www.example.com/some/test.html
+x-cache: FunctionGeneratedResponse from cloudfront
+via: 1.1 18973cd357a68e16bd20873be51e8596.cloudfront.net (CloudFront)
+x-amz-cf-pop: SYD62-P1
+x-amz-cf-id: MSSoe8Ig71wVVJe2PY1Np6xf7H1l3VPhAsJv3Cm4JythslfyC-yrGg==
+```
+
+- Regex type redirect
+```
+$ curl -I https://www.example.com/SOME/TEST.html 
+HTTP/2 301 
+server: CloudFront
+date: Thu, 27 Jun 2024 02:42:17 GMT
+content-length: 0
+location: /newpath/SOME/TEST.html
+x-cache: FunctionGeneratedResponse from cloudfront
+via: 1.1 3437ef72cec711eb0ebed9222a22cf66.cloudfront.net (CloudFront)
+x-amz-cf-pop: SYD62-P1
+x-amz-cf-id: ZRbuc4roRxVq4AG5Isz9X7t8iEY6iARDNiD7JSVcYYSE9vT30h9aXg==
+```
+
+- Standard redirection rule
+```
+$ curl -I https://www.example.com/stays/hotel-name/ipad-front-desk 
+HTTP/2 301 
+server: CloudFront
+date: Thu, 27 Jun 2024 02:43:16 GMT
+content-length: 0
+location: https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=1234&idLang=en&origin=HOTEL
+x-cache: FunctionGeneratedResponse from cloudfront
+via: 1.1 d9766b9925771288ecfcf1392328f114.cloudfront.net (CloudFront)
+x-amz-cf-pop: SYD62-P1
+x-amz-cf-id: DIsyAH7kx8fd9nnoPULEssHR9EjqcJ7K6AFxiUQJB91jG1F0qDtfWA==
+```
+
+## Debugging
 Attach debug=true query parameter or set them in request header to see additional troubleshooting header ''x-match'. This header shows the exact rule that matched the request and you can use it to look up the KV store on what action was performanced.
+
 
 ## Security
 
