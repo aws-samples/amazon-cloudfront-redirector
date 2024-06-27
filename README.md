@@ -106,7 +106,7 @@ $ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::XXXXXXXXX
   "Value": "{\"should_run_regex\":true,\"should_run_domain\":true}"
 }
 {
-  "Key": "re:d:waf2.gbborge.people.aws.dev",
+  "Key": "re:d:www.mydomain.com",
   "Value": "{\"host\":\"www.mydomain.com\",\"to\":\"https://www.example.com\",\"sc\":301,\"type\":\"domain\",\"includepath\":\"1\"}"
 }
 {
@@ -121,7 +121,6 @@ $ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::XXXXXXXXX
   "Key": "re:st:PYff/T38LiZrBklxH2yPrw==",
   "Value": "{\"path\":\"/stays/hotel-name/ipad-front-desk\",\"host\":\"www.example.com\",\"to\":\"https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=1234&idLang=en&origin=HOTEL\",\"sc\":301}"
 }
-
 ```
 
 ## Testing
