@@ -169,8 +169,34 @@ x-amz-cf-pop: SYD62-P1
 x-amz-cf-id: DIsyAH7kx8fd9nnoPULEssHR9EjqcJ7K6AFxiUQJB91jG1F0qDtfWA==
 ```
 
-## Debugging
-Attach debug=true query parameter or set them in request header to see additional troubleshooting header ''x-match'. This header shows the exact rule that matched the request and you can use it to look up the KV store on what action was performanced.
+## Troubleshooting
+
+To troubleshoot a specific redirect response, increase the default debug level from `0` to `1`. This is done by re-running `./deploy.sh` with `DEBUG_MODE=1` or explicitly adding `\"allow_debug\":\"1\"` to the value associated with `"re:config"` key in your KV store.
+
+```
+$ aws cloudfront-keyvaluestore list-keys --kvs-arn arn:aws:cloudfront::XXXXXXXXXXXX:key-value-store/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --output json | jq '.Items[]'
+{
+  "Key": "re:config",
+   "Value": "{\"should_run_regex\":true,\"should_run_domain\":true,\"allow_debug\":\"1\"}" <---
+}
+(...)
+```
+
+Afterwards, attach `debug=true` query parameter or set it as a request header to see additional an troubleshooting header ''x-match'. This header shows the exact rule that matched the request and you can use it to look up the KV store on what action was performanced.
+
+```
+$ curl -I  https://www.example.com/stays/hotel-name/ipad-front-desk?debug=true 
+HTTP/2 301 
+server: CloudFront
+date: Thu, 27 Jun 2024 03:12:11 GMT
+content-length: 0
+location: https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=1234&idLang=en&origin=HOTEL
+x-debug: match-key:st:PYff/T38LiZrBklxH2yPrw==:action:redirect
+x-cache: FunctionGeneratedResponse from cloudfront
+via: 1.1 4bfeb1eae9544366893e37b97eee8e6e.cloudfront.net (CloudFront)
+x-amz-cf-pop: SYD62-P1
+x-amz-cf-id: 8yLeoKkjrWPtBHMdfAunap0y8trG0SNJF-Odtx_x2CLXH8dh_Bd3Eg==
+```
 
 
 ## Security
