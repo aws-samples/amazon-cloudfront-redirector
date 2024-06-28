@@ -93,7 +93,7 @@ https,www.example.com,/stays/hotel-name/ipad-front-desk,,,,https://www.example.c
 
 1. The first rule is a domain type redirect (e.g. the type field has the value of "domain"). Domain rules have precedence over any other type of rules and are inspected first. In this example, all requested URLs with the domain `www.mydomain.com` are redirected to `https://www.example.com` with a 301 (Moved Permanently) status code.
 
-1. The second rule is a regex type redirect. This is determined by leaving the scheme, host, path, and qs fields empty and by defining the regular expression to match under the regex field. All regex type redirect rules are inspected after the domain redirect rules. In this example, the pattern expression `(.*?[A-Z]+.*)` is used to match a URL path containing one or more uppercase letters followed by a period. The matched path portion is captured with \L$1 in the target URL to convert it to lowercase. 
+1. The second rule is a regex type redirect. This is determined by leaving the scheme, host, path, and qs fields empty and by defining the regular expression to match under the regex field. All regex type redirect rules are inspected after the domain redirect rules. In this example, the pattern expression `(.*?[A-Z]+.*)` is used to match a URL path containing one or more uppercase letters followed by a period. The matched path portion is captured with $1 and passed to the target URL. 
 
 1. The third rule is a standard redirection rule, the last type to be inspected. In this example, `https://www.example.com/stay/hotel-name/ipad-front-desk` is redirected to `https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=1234&idLang=en&origin=HOTEL` using a 301 status code.
 
