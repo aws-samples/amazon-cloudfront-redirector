@@ -87,7 +87,7 @@ Consider the following custom CSV file example with the following three differen
 ```
 scheme,host,path,qs,regex,includeqs,to,sc,active,start,end,type,pt,includepath,message
 https,www.mydomain.com,,,,,https://www.example.com,301,,,,domain,,1,
-,,,,https://www.example.com/(.*?[A-Z]+.*),,/newpath/$1,301,,,,,,,
+,,,,https://www.example.com/(.*?[A-Z]+.*),,/newpath/\1,301,,,,,,,
 https,www.example.com,/stays/hotel-name/ipad-front-desk,,,,https://www.example.com/checkin/jsp/index/C_Checkin_Index.jsp?idHotel=1234&idLang=en&origin=HOTEL,301,,,
 ```
 
