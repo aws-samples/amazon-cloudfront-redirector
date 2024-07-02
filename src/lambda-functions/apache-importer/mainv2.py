@@ -100,12 +100,32 @@ def parse_rules(rules):
                 sc = '302'
             
             to = parts[3]
-            # remove the regex anchors if present (^ & $)
+            # remove the regex anchors if present (^ & $ | ?)
             parts[2] = parts[2][1:] if parts[2].startswith("^") else parts[2]
             parts[2] = parts[2][:-1] if parts[2].endswith("$") else parts[2]
+            parts[2] = parts[2][:-1] if parts[2].endswith("?") else parts[2]
+
             if re.search(r'\(.*\)', parts[2]):
                 output.append(f',{parts[2]},{to},{sc}')
             else:
                 output.append(f'{parts[2]},,{to},{sc}')
+        elif line.startswith('RewriteRule'):
+            parts = line.split()
+            # some rewrite rules don't have [R=301,NC,L] defined. Assume it's a permanent redirect 
+            if len(parts) < 4 or "R=301" in parts[3]:
+                sc = '301'
+            else:
+                sc = '302'
+            
+            to = parts[2]
+            # remove the regex anchors if present (^ & $ | ?)
+            parts[1] = parts[1][1:] if parts[1].startswith("^") else parts[1]
+            parts[1] = parts[1][:-1] if parts[1].endswith("$") else parts[1]
+            parts[1] = parts[1][:-1] if parts[1].endswith("?") else parts[1]
+
+            if re.search(r'\(.*\)', parts[1]):
+                output.append(f',{parts[1]},{to},{sc}')
+            else:
+                output.append(f'{parts[1]},,{to},{sc}')
                 
     return '\n'.join(output)
