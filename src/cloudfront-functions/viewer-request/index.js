@@ -155,14 +155,15 @@ function decorateForRewrite(request, matchedRule) {
     let to = matchedRule['to'];
     let index = to.indexOf('?')
     if (index != -1) {
-        request.uri = to.substring(0, index);
         let qsArray = querystring.parse(to.substring(index + 1));
         let reqQs = request.querystring;
         for (let key in qsArray) {
             reqQs[key] = { "value": qsArray[key] };
         }
         request.querystring = reqQs;
+        to = to.substring(0, index);
     }
+    request.uri = to;
 }
 
 // Generates the response redirect.
