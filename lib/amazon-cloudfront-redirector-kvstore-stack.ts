@@ -90,6 +90,19 @@ export class AmazonCloudfrontRedirectorKvstoreStack extends cdk.Stack {
       }
     });
 
+    // Function to export KVS content
+    let redirectExportFunction = new Function(this, 'RedirectExporter', {
+      runtime: Runtime.PYTHON_3_10,
+      handler: 'kvsexporter.lambda_handler',
+      code: Code.fromAsset(path.join(__dirname, '../src/lambda-functions/redirect-exporter')),
+      timeout: cdk.Duration.minutes(10),
+      architecture: Architecture.ARM_64,
+      environment: {
+        KVS_ARN: redirectorKVStore.keyValueStoreArn,
+	S3_BUCKET: `${myBucket.bucketName}`
+      }
+    });
+
     myBucket.addEventNotification(EventType.OBJECT_CREATED, new notifications.LambdaDestination(redirectImportFunction), {
       prefix: "import/"
     });
@@ -102,13 +115,32 @@ export class AmazonCloudfrontRedirectorKvstoreStack extends cdk.Stack {
       })],
     }));
 
-    // provide permissions to function to perform read/write operations to specific S3 bucket
+    // provide permissions to function to perform read/write operations to specific KVS
     redirectImportFunction.role?.attachInlinePolicy(new iam.Policy(this, 'KVPolicy', {
       statements: [new iam.PolicyStatement({
         actions: ['cloudfront-keyvaluestore:*'],
         resources: [redirectorKVStore.keyValueStoreArn],
       })],
     }));
+
+
+    // provide permissions to function to perform read/write operations to specific S3 bucket
+    redirectExportFunction.role?.attachInlinePolicy(new iam.Policy(this, 'S3Policy_2', {
+      statements: [new iam.PolicyStatement({
+        actions: ['s3:PutObject'],
+        resources: [`${myBucket.bucketArn}/export/*`],
+      })],
+    }));
+
+    // provide permissions to function to perform read/write operations to specific KVS
+    redirectExportFunction.role?.attachInlinePolicy(new iam.Policy(this, 'KVPolicy_2', {
+      statements: [new iam.PolicyStatement({
+        actions: ['cloudfront-keyvaluestore:GetKey','cloudfront-keyvaluestore:ListKeys','cloudfront-keyvaluestore:DescribeKeyValueStore'],
+        resources: [redirectorKVStore.keyValueStoreArn],
+      })],
+    }));
+
+
 
     let httpOrigin = new origins.HttpOrigin("post-tag-alb-457863598.us-east-1.elb.amazonaws.com", {
       protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
