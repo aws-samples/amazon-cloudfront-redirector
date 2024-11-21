@@ -92,7 +92,7 @@ export class AmazonCloudfrontRedirectorKvstoreStack extends cdk.Stack {
 
     // Function to export KVS content
     let redirectExportFunction = new Function(this, 'RedirectExporter', {
-      runtime: Runtime.PYTHON_3_10,
+      runtime: Runtime.PYTHON_3_13,
       handler: 'kvsexporter.lambda_handler',
       code: Code.fromAsset(path.join(__dirname, '../src/lambda-functions/redirect-exporter')),
       timeout: cdk.Duration.minutes(10),
