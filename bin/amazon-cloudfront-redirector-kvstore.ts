@@ -6,7 +6,7 @@ import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
 
 const app = new App();
 const stack = new AmazonCloudfrontRedirectorKvstoreStack(app, 'AmazonCloudfrontRedirectorKvstoreStack1', {
-  terminationProtection: true,
+  terminationProtection: false,
   env: { account: process.env.CDK_DEPLOY_ACCOUNT || process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
   debugMode: process.env.DEBUG_MODE || 0,
 } as AmazonCloudfrontRedirectorKvstoreStackProps);

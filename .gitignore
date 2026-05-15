@@ -2,3 +2,4 @@ node_modules
 cdk.out
 package-lock.json
 Apache*
+examples/sample-rules.csv

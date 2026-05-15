@@ -37,8 +37,7 @@ This solution leverages AWS CDK meaning that [NPM, NodeJS](https://docs.npmjs.co
 1. Clone the present repository.
 2. Customize the deployment script `deploy.sh` to use the appropriate credentials for your use case.
 ```
-# Required: set the AWS CLI profile name
-AWS_PROFILE="default"
+# Required: set the AWS credentials for the session the terminal
 # Optional: set whether you want to debug the request.
 # DEBUG_MODE possible values 0,1,2. 
 # 2 -> print all log lines in CloudWatch and also send debug response headers

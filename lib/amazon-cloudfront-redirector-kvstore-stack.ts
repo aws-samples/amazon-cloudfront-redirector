@@ -51,7 +51,10 @@ export class AmazonCloudfrontRedirectorKvstoreStack extends cdk.Stack {
     //   comment: 'KV store for maintaining redirect definitions',
     // });
 
-    const redirectorKVStore = new cloudfront.KeyValueStore(this, 'RedirectorKVStore');
+    const redirectorKVStore = new cloudfront.KeyValueStore(this, 'RedirectorKVStore', {
+      keyValueStoreName: `RedirectorKVStore-${cdk.Names.uniqueId(this).slice(-12).toLowerCase()}-${this.region}`,
+      comment: 'KV store for maintaining redirect definitions',
+    });
 
     let myBucket = new Bucket(this, 'RedirectImporterBucket', {
       removalPolicy: RemovalPolicy.DESTROY,
@@ -121,6 +124,40 @@ export class AmazonCloudfrontRedirectorKvstoreStack extends cdk.Stack {
       runtime: cloudfront.FunctionRuntime.JS_2_0,
       keyValueStore: redirectorKVStore
     });
+
+    // CloudFront distribution that fronts the origin and runs the redirector
+    // CloudFront Function on viewer-request of the default cache behavior.
+    const distribution = new cloudfront.Distribution(this, 'RedirectorDistribution', {
+      comment: 'CloudFront distribution for the redirector demo',
+      defaultBehavior: {
+        origin: httpOrigin,
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+        cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+        functionAssociations: [
+          {
+            function: redirectorFunction,
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          },
+        ],
+      },
+      minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
+    });
+
+    new cdk.CfnOutput(this, 'RedirectorDistributionDomainName', {
+      value: distribution.distributionDomainName,
+      description: 'The domain name of the redirector CloudFront distribution',
+    });
+
+    NagSuppressions.addResourceSuppressions(distribution, [
+      { id: 'AwsSolutions-CFR1', reason: 'Geo restrictions are not required for this redirector demo.' },
+      { id: 'AwsSolutions-CFR2', reason: 'WAF integration is out of scope for this redirector demo.' },
+      { id: 'AwsSolutions-CFR3', reason: 'Access logging is not enabled for this redirector demo.' },
+      { id: 'AwsSolutions-CFR4', reason: 'Default CloudFront certificate is used; custom domain/cert is out of scope for this demo.' },
+      { id: 'AwsSolutions-CFR5', reason: 'Origin uses HTTP because the demo ALB does not have TLS configured.' },
+      { id: 'AwsSolutions-CFR7', reason: 'OAC/OAI is not applicable for an HTTP ALB origin.' },
+    ]);
 
     let apacheImporterFunction = new Function(this, 'ApacheImporterFunction', {
       code: Code.fromAsset(path.join(__dirname, '../src/lambda-functions/apache-importer')),
